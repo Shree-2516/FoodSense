@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recommendations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h2>Top Recommendations</h2>
+    <h2>Results for "{{ selected }}"</h2>
+    <p>Showing filtered results based on your preferences</p>
+
+    {% if message %}
+        <p class="status-message">{{ message }}</p>
+    {% endif %}
+
+    {% for r in recommendations %}
+        <div class="result-card">
+            <h3>{{ r.name }}</h3>
+            <p>Rating: {{ r.rating }}</p>
+            <p>Cost: INR {{ r.cost }}</p>
+            <p>{{ r.location }}</p>
+        </div>
+    {% endfor %}
+
+    {% if not recommendations %}
+        <p class="status-message">Try another restaurant or relax one of the filters to see more recommendations.</p>
+    {% endif %}
+
+    <a class="link-button" href="{{ url_for('home') }}">Back</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container insights-container">
+    <h1>Restaurant Insights</h1>
+    <p>These charts highlight trends from the dataset used in the recommender system.</p>
+
+    <div class="insights-grid">
+        {% for image in insight_images %}
+            <div class="insight-card">
+                <h3>{{ image.title }}</h3>
+                <img src="{{ url_for('static', filename='images/' + image.filename) }}" alt="{{ image.title }}">
+            </div>
+        {% endfor %}
+    </div>
+
+    <a class="link-button" href="{{ url_for('home') }}">Back to Home</a>
+</div>
+
+</body>
+</html>

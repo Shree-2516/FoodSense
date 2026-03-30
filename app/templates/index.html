@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Recommender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Restaurant Recommendation System</h1>
+    <p>Discover restaurant suggestions based on your favorite place and preferences.</p>
+
+    <form action="/recommend" method="POST">
+        <input list="restaurants" name="restaurant" placeholder="Search restaurant..." required>
+
+        <datalist id="restaurants">
+            {% for name in data %}
+                <option value="{{ name }}">
+            {% endfor %}
+        </datalist>
+
+        <br><br>
+
+        <label>Max Budget (INR):</label>
+        <select name="budget">
+            <option value="any">Any</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+            <option value="2000">2000</option>
+        </select>
+
+        <br><br>
+
+        <label>Minimum Rating:</label>
+        <select name="rating">
+            <option value="any">Any</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+        </select>
+
+        <br><br>
+
+        <label>Cuisine:</label>
+        <input type="text" name="cuisine" placeholder="e.g. North Indian">
+
+        <br><br>
+
+        <button type="submit">Recommend</button>
+    </form>
+
+    <div class="quick-links">
+        <a class="link-button" href="{{ url_for('insights') }}">View Insights</a>
+    </div>
+
+    <div class="info-card">
+        <h3>Popular Cuisines</h3>
+        <div class="tag-list">
+            {% for item in popular_cuisines %}
+                <span class="tag">{{ item }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
