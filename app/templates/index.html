@@ -11,7 +11,7 @@
     <p>Discover restaurant suggestions based on your favorite place and preferences.</p>
 
     <form action="/recommend" method="POST">
-        <input list="restaurants" name="restaurant" placeholder="Search restaurant..." required>
+        <input list="restaurants" name="restaurant" placeholder="Search restaurant...">
 
         <datalist id="restaurants">
             {% for name in data %}
@@ -19,7 +19,7 @@
             {% endfor %}
         </datalist>
 
-        <br><br>
+        <input type="text" name="food" placeholder="Search by food (e.g. Biryani, Pizza)">
 
         <label>Max Budget (INR):</label>
         <select name="budget">
@@ -29,8 +29,6 @@
             <option value="2000">2000</option>
         </select>
 
-        <br><br>
-
         <label>Minimum Rating:</label>
         <select name="rating">
             <option value="any">Any</option>
@@ -38,12 +36,8 @@
             <option value="4">4+</option>
         </select>
 
-        <br><br>
-
         <label>Cuisine:</label>
         <input type="text" name="cuisine" placeholder="e.g. North Indian">
-
-        <br><br>
 
         <button type="submit">Recommend</button>
     </form>

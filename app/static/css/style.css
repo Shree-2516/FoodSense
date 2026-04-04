@@ -206,6 +206,44 @@ button:active {
     margin: 20px 0;
 }
 
+.result-intro {
+    max-width: 620px;
+    margin: 0 auto 24px;
+}
+
+.result-intro strong {
+    color: #ffd4c5;
+}
+
+.preference-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin: 28px 0;
+    text-align: left;
+}
+
+.summary-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.summary-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.summary-value {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
 /* Insights Page Specifics */
 .insights-container {
     width: min(1200px, 100%);
@@ -262,6 +300,30 @@ button:active {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
+.top-highlight {
+    border: 2px solid #ff5722;
+    box-shadow: 0 0 15px rgba(255, 87, 34, 0.5);
+    transform: scale(1.02);
+}
+
+.top-highlight:hover {
+    transform: translateY(-3px) scale(1.02);
+}
+
+.top-badge {
+    display: inline-block;
+    margin: 0 0 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 87, 34, 0.18);
+    border: 1px solid rgba(255, 87, 34, 0.4);
+    color: #ffd0c2;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
 .result-card h3 {
     margin-top: 0;
     -webkit-background-clip: text;
@@ -276,4 +338,47 @@ button:active {
     margin: 8px 0;
     font-size: 15px;
     color: #e0e0e0;
+}
+
+.result-type {
+    margin-top: -4px;
+    color: #ffd4c5;
+    font-weight: 500;
+}
+
+.result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f6f6f6;
+    font-size: 14px;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 20px 12px;
+    }
+
+    .container {
+        padding: 28px 18px;
+    }
+
+    .preference-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .result-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

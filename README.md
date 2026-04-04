@@ -41,11 +41,10 @@ This project is a Flask-based restaurant recommendation system powered by a cont
 
 1. Create and activate a virtual environment.
 2. Install the required packages.
-3. Run the Flask app from the `app` folder.
+3. Run the Flask app from the project root.
 
 ```bash
 pip install flask scikit-learn pandas numpy matplotlib seaborn jupyter
-cd app
 python app.py
 ```
 
@@ -56,7 +55,6 @@ python app.py
 
 ```text
 app/
-  app.py
   static/
     css/
     images/
@@ -64,6 +62,7 @@ app/
     index.html
     result.html
     insights.html
+app.py
 model/
   build_model.ipynb
   recommend.py
