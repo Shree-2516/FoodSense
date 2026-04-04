@@ -33,6 +33,10 @@
             <span class="summary-value">{{ preferences.food }}</span>
         </div>
         <div class="summary-item">
+            <span class="summary-label">Area / City</span>
+            <span class="summary-value">{{ preferences.location }}</span>
+        </div>
+        <div class="summary-item">
             <span class="summary-label">Budget</span>
             <span class="summary-value">{{ preferences.budget }}</span>
         </div>
@@ -61,11 +65,17 @@
                 <span class="meta-pill">Rating: {{ r.rating }}</span>
                 <span class="meta-pill">Cost for two: INR {{ r.cost }}</span>
                 <span class="meta-pill">Area: {{ r.location }}</span>
-                {% if search_mode == "food" and r.score is defined %}
+                {% if r.score is defined %}
                     <span class="meta-pill">Score: {{ r.score }}</span>
+                {% endif %}
+                {% if r.sentiment is defined %}
+                    <span class="meta-pill">Sentiment: {{ r.sentiment }}</span>
                 {% endif %}
             </div>
             <p><strong>Cuisine:</strong> {{ r.cuisine if r.cuisine else "Not available" }}</p>
+            {% if r.keywords %}
+                <p><strong>Keywords:</strong> <span style="text-transform: capitalize;">{{ r.keywords }}</span></p>
+            {% endif %}
         </div>
     {% endfor %}
 

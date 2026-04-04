@@ -21,6 +21,14 @@
 
         <input type="text" name="food" placeholder="Search by food (e.g. Biryani, Pizza)">
 
+        <label>Area / City:</label>
+        <select name="location">
+            <option value="any">Any</option>
+            {% for loc in locations %}
+                <option value="{{ loc }}">{{ loc }}</option>
+            {% endfor %}
+        </select>
+
         <label>Max Budget (INR):</label>
         <select name="budget">
             <option value="any">Any</option>
@@ -38,6 +46,14 @@
 
         <label>Cuisine:</label>
         <input type="text" name="cuisine" placeholder="e.g. North Indian">
+
+        <label>Smart Filters:</label>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="is_veg" value="true"> Veg/Veg Options</label>
+            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="has_outdoor" value="true"> Outdoor Seating</label>
+            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="online_order" value="true"> Online Order</label>
+            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="book_table" value="true"> Table Booking</label>
+        </div>
 
         <button type="submit">Recommend</button>
     </form>

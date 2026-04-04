@@ -1,8 +1,12 @@
 from pathlib import Path
 import pickle
+import math
+import numpy as np
+import pandas as pd
 
 from flask import Flask, render_template, request
 from sklearn.metrics.pairwise import cosine_similarity
+from textblob import TextBlob
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "model"
@@ -20,6 +24,27 @@ with (MODEL_DIR / "tfidf.pkl").open("rb") as file:
 
 with (MODEL_DIR / "tfidf_matrix.pkl").open("rb") as file:
     tfidf_matrix = pickle.load(file)
+
+# Perform NLP on Reviews
+if "reviews_list" in df.columns:
+    df["sentiment"] = df["reviews_list"].apply(
+        lambda x: TextBlob(str(x)).sentiment.polarity
+    )
+    
+    def extract_keywords(text):
+        try:
+            blob = TextBlob(str(text))
+            words = [w.lower() for w in blob.words if len(w) > 4]
+            from collections import Counter
+            top_words = [w for w, c in Counter(words).most_common(3)]
+            return ", ".join(top_words)
+        except:
+            return ""
+            
+    df["keywords"] = df["reviews_list"].apply(extract_keywords)
+else:
+    df["sentiment"] = 0.0
+    df["keywords"] = ""
 
 
 def _parse_cost(value):
@@ -60,7 +85,7 @@ def _series_or_default(data, column, default):
     return [default] * len(data)
 
 
-def _format_preferences(budget, rating, cuisine, food=""):
+def _format_preferences(budget, rating, cuisine, food="", location="any"):
     return {
         "budget": f"Up to INR {budget}" if budget != "any" else "Any budget",
         "rating": f"Rating {rating}+"
@@ -68,22 +93,50 @@ def _format_preferences(budget, rating, cuisine, food=""):
         else "Any rating",
         "cuisine": cuisine.strip() if cuisine and cuisine.strip() else "Any cuisine",
         "food": food.strip() if food and food.strip() else "Any dish",
+        "location": location if location != "any" else "Any area",
     }
 
 
-def recommend(name, budget="any", rating="any", cuisine="", top_n=6):
+def recommend(name, budget="any", rating="any", cuisine="", target_location="any", is_veg=False, has_outdoor=False, online_order=False, book_table=False, top_n=6):
     if name not in df["name"].values:
         return []
 
     idx = df[df["name"] == name].index[0]
-    selected_location = df.iloc[idx]["location"]
+    if target_location != "any":
+        selected_location = target_location
+    else:
+        selected_location = df.iloc[idx]["location"]
     query_vec = tfidf_matrix[idx]
     similarity = cosine_similarity(query_vec, tfidf_matrix).flatten()
-    distances = sorted(enumerate(similarity), key=lambda x: x[1], reverse=True)
+
+    hybrid_scores = []
+    for i, sim_score in enumerate(similarity):
+        row = df.iloc[i]
+        try:
+            rating_val = float(row["rate"])
+        except Exception:
+            rating_val = 0.0
+            
+        try:
+            votes_val = int(row["votes"])
+        except Exception:
+            votes_val = 0
+            
+        normalized_rating = rating_val / 5.0
+        log_votes = math.log10(votes_val + 1)
+        final_score = (0.5 * sim_score) + (0.3 * normalized_rating) + (0.2 * log_votes)
+        
+        if "sentiment" in row and pd.notna(row["sentiment"]):
+            final_score += float(row["sentiment"]) * 0.2
+            
+        hybrid_scores.append((i, final_score))
+
+    distances = sorted(hybrid_scores, key=lambda x: x[1], reverse=True)
 
     results = []
+    seen_names = set()
 
-    for i, _ in distances:
+    for i, h_score in distances:
         restaurant = df.iloc[i]
 
         try:
@@ -100,6 +153,9 @@ def recommend(name, budget="any", rating="any", cuisine="", top_n=6):
 
         if restaurant["name"] == name:
             continue
+            
+        if restaurant["name"] in seen_names:
+            continue
 
         if budget != "any" and restaurant_cost > int(budget):
             continue
@@ -110,6 +166,17 @@ def recommend(name, budget="any", rating="any", cuisine="", top_n=6):
         if cuisine and cuisine.strip() and cuisine.strip().lower() not in str(restaurant["cuisines"]).lower():
             continue
 
+        if is_veg and not restaurant.get("is_veg", False):
+            continue
+        if has_outdoor and not restaurant.get("has_outdoor", False):
+            continue
+        if online_order and str(restaurant.get("online_order", "")).lower() != "yes":
+            continue
+        if book_table and str(restaurant.get("book_table", "")).lower() != "yes":
+            continue
+            
+        seen_names.add(restaurant["name"])
+
         results.append(
             {
                 "name": restaurant["name"],
@@ -118,6 +185,9 @@ def recommend(name, budget="any", rating="any", cuisine="", top_n=6):
                 "location": restaurant["location"],
                 "cuisine": restaurant["cuisines"],
                 "type": restaurant["rest_type"],
+                "sentiment": round(restaurant.get("sentiment", 0.0), 2),
+                "keywords": restaurant.get("keywords", ""),
+                "score": round(h_score, 2),
             }
         )
 
@@ -127,7 +197,7 @@ def recommend(name, budget="any", rating="any", cuisine="", top_n=6):
     return results
 
 
-def recommend_by_food(food_name, data, min_rating=0, max_cost=None, top_n=10):
+def recommend_by_food(food_name, data, min_rating=0, max_cost=None, target_location="any", is_veg=False, has_outdoor=False, online_order=False, book_table=False, top_n=10):
     food_name = str(food_name).strip().lower()
     if not food_name:
         return []
@@ -145,6 +215,18 @@ def recommend_by_food(food_name, data, min_rating=0, max_cost=None, top_n=10):
         matches = matches | filtered[column].str.contains(food_name, regex=False)
 
     filtered = filtered[matches].copy()
+
+    if target_location != "any":
+        filtered = filtered[filtered["location"] == target_location]
+
+    if is_veg:
+        filtered = filtered[filtered["is_veg"] == True]
+    if has_outdoor:
+        filtered = filtered[filtered["has_outdoor"] == True]
+    if online_order:
+        filtered = filtered[filtered["online_order"].str.lower() == "yes"]
+    if book_table:
+        filtered = filtered[filtered["book_table"].str.lower() == "yes"]
 
     if filtered.empty:
         return []
@@ -174,7 +256,12 @@ def recommend_by_food(food_name, data, min_rating=0, max_cost=None, top_n=10):
     else:
         filtered["score"] = filtered["rate"] * 0.6
 
-    filtered = filtered.sort_values(by="score", ascending=False).head(top_n)
+    if "sentiment" in filtered.columns:
+        filtered["score"] += filtered["sentiment"] * 0.2
+
+    filtered = filtered.sort_values(by="score", ascending=False)
+    filtered = filtered.drop_duplicates(subset=["name"])
+    filtered = filtered.head(top_n)
 
     return [
         {
@@ -187,21 +274,24 @@ def recommend_by_food(food_name, data, min_rating=0, max_cost=None, top_n=10):
             "cuisine": row.get("cuisines", "Not available"),
             "type": row.get("rest_type", "Restaurant"),
             "score": round(row["score"], 2),
+            "sentiment": round(row.get("sentiment", 0.0), 2),
+            "keywords": row.get("keywords", ""),
         }
         for _, row in filtered.iterrows()
     ]
 
 
-def get_recommendations(user_input, food_input=None, min_rating=0, max_cost=None, cuisine=""):
+def get_recommendations(user_input, food_input=None, min_rating=0, max_cost=None, cuisine="", target_location="any", is_veg=False, has_outdoor=False, online_order=False, book_table=False):
     if food_input and food_input.strip():
-        return recommend_by_food(food_input, df, min_rating, max_cost)
+        return recommend_by_food(food_input, df, min_rating, max_cost, target_location, is_veg, has_outdoor, online_order, book_table)
 
-    return recommend(user_input, budget=max_cost if max_cost is not None else "any", rating=min_rating if min_rating else "any", cuisine=cuisine)
+    return recommend(user_input, budget=max_cost if max_cost is not None else "any", rating=min_rating if min_rating else "any", cuisine=cuisine, target_location=target_location, is_veg=is_veg, has_outdoor=has_outdoor, online_order=online_order, book_table=book_table)
 
 
 @app.route("/")
 def home():
     restaurant_list = sorted(df["name"].unique())
+    locations = sorted([str(loc) for loc in df["location"].unique() if str(loc).strip() and str(loc).lower() != "nan"])
     popular_cuisines = (
         df["cuisines"]
         .dropna()
@@ -214,7 +304,7 @@ def home():
         .index
         .tolist()
     )
-    return render_template("index.html", data=restaurant_list, popular_cuisines=popular_cuisines)
+    return render_template("index.html", data=restaurant_list, locations=locations, popular_cuisines=popular_cuisines)
 
 
 @app.route("/insights")
@@ -235,8 +325,14 @@ def get_recommendation():
     budget = request.form["budget"]
     rating = request.form["rating"]
     cuisine = request.form["cuisine"]
+    location = request.form.get("location", "any")
     min_rating = float(rating) if rating != "any" else 0
     max_cost = int(budget) if budget != "any" else None
+
+    is_veg = request.form.get("is_veg") == "true"
+    has_outdoor = request.form.get("has_outdoor") == "true"
+    online_order = request.form.get("online_order") == "true"
+    book_table = request.form.get("book_table") == "true"
 
     if (not restaurant or restaurant.strip() == "") and (not food or food.strip() == ""):
         return render_template(
@@ -244,12 +340,12 @@ def get_recommendation():
             recommendations=[],
             message="Enter a restaurant or a food item to get recommendations.",
             selected=None,
-            preferences=_format_preferences("any", "any", "", ""),
+            preferences=_format_preferences("any", "any", "", "", "any"),
             search_mode="empty",
         )
 
     if food and food.strip():
-        result = get_recommendations(restaurant, food, min_rating, max_cost, cuisine)
+        result = get_recommendations(restaurant, food, min_rating, max_cost, cuisine, location, is_veg, has_outdoor, online_order, book_table)
         message = None
         if not result:
             message = "No restaurants matched that dish with your selected filters. Try a different food item or relax the filters."
@@ -259,7 +355,7 @@ def get_recommendation():
             recommendations=result,
             selected=restaurant if restaurant and restaurant.strip() else None,
             message=message,
-            preferences=_format_preferences(budget, rating, cuisine, food),
+            preferences=_format_preferences(budget, rating, cuisine, food, location),
             search_mode="food",
         )
 
@@ -269,11 +365,11 @@ def get_recommendation():
             recommendations=[],
             message="Restaurant not found",
             selected=None,
-            preferences=_format_preferences(budget, rating, cuisine, food),
+            preferences=_format_preferences(budget, rating, cuisine, food, location),
             search_mode="restaurant",
         )
 
-    result = get_recommendations(restaurant, None, min_rating, max_cost, cuisine)
+    result = get_recommendations(restaurant, None, min_rating, max_cost, cuisine, location, is_veg, has_outdoor, online_order, book_table)
     message = None
     if not result:
         message = "No restaurants matched your selected filters. Try changing budget, rating, or cuisine."
@@ -283,7 +379,7 @@ def get_recommendation():
         recommendations=result,
         selected=restaurant,
         message=message,
-        preferences=_format_preferences(budget, rating, cuisine, food),
+        preferences=_format_preferences(budget, rating, cuisine, food, location),
         search_mode="restaurant",
     )
 
