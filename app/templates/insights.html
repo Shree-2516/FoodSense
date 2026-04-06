@@ -2,11 +2,16 @@
 <html>
 <head>
     <title>Restaurant Insights</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
 </head>
 <body>
 
 <div class="container insights-container">
+    <div class="top-bar">
+        <div class="user-chip">Signed in as {{ current_user["email"] }}</div>
+        <a class="link-button" href="{{ request.url_for('logout') }}">Logout</a>
+    </div>
+
     <h1>Restaurant Insights</h1>
     <p>These charts highlight trends from the dataset used in the recommender system.</p>
 
@@ -14,12 +19,12 @@
         {% for image in insight_images %}
             <div class="insight-card">
                 <h3>{{ image.title }}</h3>
-                <img src="{{ url_for('static', filename='images/' + image.filename) }}" alt="{{ image.title }}">
+                <img src="{{ request.url_for('static', path='images/' + image.filename) }}" alt="{{ image.title }}">
             </div>
         {% endfor %}
     </div>
 
-    <a class="link-button" href="{{ url_for('home') }}">Back to Home</a>
+    <a class="link-button" href="{{ request.url_for('home') }}">Back to Home</a>
 </div>
 
 </body>

@@ -2,75 +2,140 @@
 <html>
 <head>
     <title>Restaurant Recommender</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
 </head>
-<body>
+<body class="home-page">
 
-<div class="container">
-    <h1>Restaurant Recommendation System</h1>
-    <p>Discover restaurant suggestions based on your favorite place and preferences.</p>
+<header class="site-navbar">
+    <div class="site-brand">Restaurant Recommendation System</div>
+    <nav class="site-nav">
+        <a class="nav-link active" href="{{ request.url_for('home') }}">Home</a>
+        <a class="nav-link" href="#recommend-form">Recommend</a>
+        <a class="nav-link" href="{{ request.url_for('insights') }}">Insights</a>
+        <a class="nav-link" href="{{ request.url_for('logout') }}">Logout</a>
+    </nav>
+</header>
 
-    <form action="/recommend" method="POST">
-        <input list="restaurants" name="restaurant" placeholder="Search restaurant...">
+<main class="home-wrapper">
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <div class="user-chip home-user-chip">Signed in as {{ current_user["email"] }}</div>
+            <h1 class="hero-title">Build recommendation system with ease!!</h1>
+            <p class="hero-text">
+                In this age of information overload, people use a variety of strategies to make choices about what to buy,
+                how to spend their leisure time, and even where to go. Recommender systems automate some of these strategies
+                with the goal of providing affordable guidance. This project creates restaurant suggestions by learning from
+                reviews, cuisine patterns, and user preferences so you can quickly discover highly rated places.
+            </p>
+            <div class="hero-actions">
+                <span class="hero-label">Test the system</span>
+                <a class="hero-button" href="#recommend-form">Recommend</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <img src="{{ request.url_for('static', path='food.jpg') }}" alt="Food plate showcase">
+        </div>
+    </section>
 
-        <datalist id="restaurants">
-            {% for name in data %}
-                <option value="{{ name }}">
-            {% endfor %}
-        </datalist>
-
-        <input type="text" name="food" placeholder="Search by food (e.g. Biryani, Pizza)">
-
-        <label>Area / City:</label>
-        <select name="location">
-            <option value="any">Any</option>
-            {% for loc in locations %}
-                <option value="{{ loc }}">{{ loc }}</option>
-            {% endfor %}
-        </select>
-
-        <label>Max Budget (INR):</label>
-        <select name="budget">
-            <option value="any">Any</option>
-            <option value="500">500</option>
-            <option value="1000">1000</option>
-            <option value="2000">2000</option>
-        </select>
-
-        <label>Minimum Rating:</label>
-        <select name="rating">
-            <option value="any">Any</option>
-            <option value="3">3+</option>
-            <option value="4">4+</option>
-        </select>
-
-        <label>Cuisine:</label>
-        <input type="text" name="cuisine" placeholder="e.g. North Indian">
-
-        <label>Smart Filters:</label>
-        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
-            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="is_veg" value="true"> Veg/Veg Options</label>
-            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="has_outdoor" value="true"> Outdoor Seating</label>
-            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="online_order" value="true"> Online Order</label>
-            <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px;"><input type="checkbox" name="book_table" value="true"> Table Booking</label>
+    <section class="dashboard-card" id="recommend-form">
+        <div class="section-heading">
+            <h2>Recommendation Dashboard</h2>
+            <p>Search by restaurant or dish, then tune the filters to get better matches.</p>
         </div>
 
-        <button type="submit">Recommend</button>
-    </form>
+        <form action="/recommend" method="POST" class="dashboard-form">
+            <div class="form-grid">
+                <div class="field-group field-span-2">
+                    <label for="restaurant">Restaurant</label>
+                    <input id="restaurant" list="restaurants" name="restaurant" placeholder="Search restaurant...">
+                    <datalist id="restaurants">
+                        {% for name in data %}
+                            <option value="{{ name }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
 
-    <div class="quick-links">
-        <a class="link-button" href="{{ url_for('insights') }}">View Insights</a>
-    </div>
+                <div class="field-group field-span-2">
+                    <label for="food">Food Item</label>
+                    <input id="food" type="text" name="food" placeholder="Search by food (e.g. Biryani, Pizza)">
+                </div>
 
-    <div class="info-card">
-        <h3>Popular Cuisines</h3>
-        <div class="tag-list">
+                <div class="field-group">
+                    <label for="location">Area / City</label>
+                    <select id="location" name="location">
+                        <option value="any">Any</option>
+                        {% for loc in locations %}
+                            <option value="{{ loc }}">{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="budget">Max Budget (INR)</label>
+                    <select id="budget" name="budget">
+                        <option value="any">Any</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="2000">2000</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="rating">Minimum Rating</label>
+                    <select id="rating" name="rating">
+                        <option value="any">Any</option>
+                        <option value="3">3+</option>
+                        <option value="4">4+</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="cuisine">Cuisine</label>
+                    <input id="cuisine" type="text" name="cuisine" placeholder="e.g. North Indian">
+                </div>
+            </div>
+
+            <div class="filters-block">
+                <label>Smart Filters</label>
+                <div class="smart-filters-container">
+                    <label class="smart-filter-btn">
+                        <input type="checkbox" name="is_veg" value="true">
+                        <span class="filter-text">Veg/Veg Options</span>
+                    </label>
+                    <label class="smart-filter-btn">
+                        <input type="checkbox" name="has_outdoor" value="true">
+                        <span class="filter-text">Outdoor Seating</span>
+                    </label>
+                    <label class="smart-filter-btn">
+                        <input type="checkbox" name="online_order" value="true">
+                        <span class="filter-text">Online Order</span>
+                    </label>
+                    <label class="smart-filter-btn">
+                        <input type="checkbox" name="book_table" value="true">
+                        <span class="filter-text">Table Booking</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <button type="submit">Recommend</button>
+                <a class="secondary-link" href="{{ request.url_for('insights') }}">View Insights</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="dashboard-card compact-card">
+        <div class="section-heading">
+            <h2>Popular Cuisines</h2>
+            <p>This is the home main page that describes the project and summarizes it.</p>
+        </div>
+        <div class="tag-list home-tags">
             {% for item in popular_cuisines %}
                 <span class="tag">{{ item }}</span>
             {% endfor %}
         </div>
-    </div>
-</div>
+    </section>
+</main>
 
 </body>
 </html>

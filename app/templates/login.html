@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login | Restaurant Recommender</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
+</head>
+<body>
+
+<div class="container auth-container">
+    <div class="auth-badge">Welcome Back</div>
+    <h1>Login to continue</h1>
+    <p>Use your email and password to access the restaurant recommendation dashboard.</p>
+
+    {% if flash_messages %}
+        {% for message in flash_messages %}
+            <p class="status-message">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <form action="{{ request.url_for('login_post') }}" method="POST" class="auth-form">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" value="{{ email if email else '' }}" placeholder="Enter your email" required>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" placeholder="Enter your password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <div class="auth-links">
+        <span>New here?</span>
+        <a class="link-button" href="{{ request.url_for('register') }}">Create account</a>
+    </div>
+</div>
+
+</body>
+</html>

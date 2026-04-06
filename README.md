@@ -2,20 +2,21 @@
 
 ## Project Overview
 
-This project is a Flask-based restaurant recommendation system powered by a content-based filtering model. Users can search for a restaurant and refine recommendations using budget, rating, and cuisine preferences. The project also includes data visualizations that summarize restaurant trends from the dataset.
+This project is a FastAPI-based restaurant recommendation system powered by a content-based filtering model. Users can search for a restaurant and refine recommendations using budget, rating, and cuisine preferences. The project also includes data visualizations that summarize restaurant trends from the dataset.
 
 ## Features
 
 - Restaurant recommendations based on similarity
 - Filtered results using budget, minimum rating, and cuisine
 - Friendly error messages when a restaurant is not found or no filtered matches are available
+- Login and registration with SQLite-backed user storage
 - Insights page for dataset visualizations
 - Popular cuisines section on the homepage
 
 ## Tech Stack
 
 - Python
-- Flask
+- FastAPI
 - Scikit-learn
 - Pickle
 - HTML
@@ -41,15 +42,24 @@ This project is a Flask-based restaurant recommendation system powered by a cont
 
 1. Create and activate a virtual environment.
 2. Install the required packages.
-3. Run the Flask app from the project root.
+3. Run the FastAPI app from the project root.
 
 ```bash
-pip install flask scikit-learn pandas numpy matplotlib seaborn jupyter
-python app.py
+pip install -r requirements.txt
+uvicorn app:app --reload
 ```
 
-4. Open the local Flask URL in your browser.
-5. Visit `/insights` to view the saved visualizations in the web app.
+4. Add your default login credentials in `.env`:
+
+```env
+APP_USER_EMAIL=shreeyash2573@gmail.com
+APP_USER_PASSWORD=Shreeyash@2516
+FLASK_SECRET_KEY=restaurant-recommender-secret-key
+```
+
+5. Open the local FastAPI URL in your browser, usually `http://127.0.0.1:8000`.
+6. Log in with the seeded user or create a new account from the register page.
+7. Visit `/insights` to view the saved visualizations in the web app.
 
 ## Project Structure
 

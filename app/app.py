@@ -13,4 +13,6 @@ SPEC.loader.exec_module(root_app)
 app = root_app.app
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import uvicorn
+
+    uvicorn.run(app, host="127.0.0.1", port=8000)

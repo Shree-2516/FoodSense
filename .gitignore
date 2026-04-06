@@ -72,3 +72,4 @@ node_modules/
 # ===============================
 *.bak
 *.backup
+users.db
