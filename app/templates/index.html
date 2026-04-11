@@ -153,12 +153,12 @@
             <div class="form-grid">
                 <div class="field-group field-span-2">
                     <label for="restaurant">Restaurant</label>
-                    <input id="restaurant" list="restaurants" name="restaurant" placeholder="Search restaurant...">
-                    <datalist id="restaurants">
+                    <select id="restaurant" name="restaurant">
+                        <option value="">Select a restaurant...</option>
                         {% for name in data %}
-                            <option value="{{ name }}">
+                            <option value="{{ name }}">{{ name }}</option>
                         {% endfor %}
-                    </datalist>
+                    </select>
                 </div>
 
                 <div class="field-group field-span-2">
