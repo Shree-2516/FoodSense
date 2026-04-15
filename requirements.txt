@@ -6,3 +6,4 @@ pandas
 textblob
 gunicorn
 jinja2
+itsdangerous
