@@ -1,5 +1,8 @@
 # Restaurant Recommendation System
 
+## Restaurant Recommendation System
+https://foodrecommendation-in.onrender.comLive 
+
 ## Project Overview
 
 This project is a FastAPI-based restaurant recommendation system powered by a content-based filtering model. Users can search for a restaurant and refine recommendations using budget, rating, and cuisine preferences. The project also includes data visualizations that summarize restaurant trends from the dataset.

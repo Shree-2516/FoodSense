@@ -677,7 +677,16 @@ async def get_recommendation(request: Request):
     )
 
 
-if __name__ == "__main__":
-    import uvicorn
+# if __name__ == "__main__":
+#     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+#     uvicorn.run(app, host="127.0.0.1", port=8000)
+
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"message": "App is running"}
